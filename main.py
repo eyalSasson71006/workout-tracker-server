@@ -1,21 +1,30 @@
 # main.py
 import cv2
 from app.core.config import settings
+from app.utils.enums import Workout
 from app.vision.pose_detector import PoseDetector
-# NEW: Import our PushUp logic
-from app.exercises.pushup import PushUpCounter 
+from app.exercises.registry import WORKOUT_REGISTRY
 
 def main():
     detector = PoseDetector()
-    
-    # NEW: Initialize the PushUp Counter
-    pushup_tracker = PushUpCounter()
-    
+
     cap = cv2.VideoCapture(settings.CAMERA_INDEX)
     cap.set(3, settings.FRAME_WIDTH)
     cap.set(4, settings.FRAME_HEIGHT)
     
-    print("Starting Push-Up Tracker. Press 'q' to exit.")
+    workout_names = [w.value.capitalize() for w in Workout]
+    print("Starting Workout Tracker. Press 'q' to exit.")
+
+    selected_workout = None
+    while selected_workout is None:
+        user_input = input(f"Please select a workout from the following list: {workout_names}\n").strip().lower()
+        try:
+            selected_workout = Workout(user_input)
+        except ValueError:
+            print("Invalid selection, try again.")
+
+    # Initialize the selected workout tracker
+    workout_tracker = WORKOUT_REGISTRY[selected_workout]()
 
     while True:
         success, img = cap.read()
@@ -30,10 +39,9 @@ def main():
         
         # 3. IF we found a person, count their push-ups
         if landmarks:
-            # We pass the landmarks to our specific exercise logic
-            img = pushup_tracker.process(img, landmarks)
+            img = workout_tracker.process(img, landmarks)
 
-        cv2.imshow("Calisthenics AI - PushUp Tracker", img)
+        cv2.imshow(f"Calisthenics AI - {selected_workout.value.capitalize()} Tracker", img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
