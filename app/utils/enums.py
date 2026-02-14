@@ -3,6 +3,6 @@ from enum import Enum
 
 class Workout(Enum):
     PUSHUP = "pushup"
-    # SQUAT = "squat"
+    SQUAT = "squat"
     # PULLUP = "pullup"
     # SITUP = "situp"
