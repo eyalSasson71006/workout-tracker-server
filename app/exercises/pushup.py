@@ -1,12 +1,14 @@
 from app.utils.geometry import calculate_angle, get_xy
-from app.utils.pose_checks import is_body_horizontal
+from app.utils.pose_checks import is_body_horizontal, is_back_straight
 from app.utils.enums import BodyParts
 from app.exercises.exercise import ExerciseCounter
 
 
 class PushUpCounter(ExerciseCounter):
-    position_check = staticmethod(is_body_horizontal)
-    position_feedback = "Setup: Lie down horizontally"
+    position_checks = [
+        (is_body_horizontal, "Setup: Lie down horizontally"),
+        (is_back_straight, "Setup: Keep your back straight!"),
+    ]
 
     def get_angle(self, landmarks):
         shoulder = get_xy(landmarks[BodyParts.SHOULDER.left])

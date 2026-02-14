@@ -6,8 +6,9 @@ from app.exercises.exercise import ExerciseCounter
 
 class SquatCounter(ExerciseCounter):
     required_groups = [BodyParts.SHOULDER, BodyParts.HIP, BodyParts.KNEE, BodyParts.ANKLE]
-    position_check = staticmethod(is_body_vertical)
-    position_feedback = "Setup: Straighten your back!"
+    position_checks = [
+        (is_body_vertical, "Setup: Straighten your back!"),
+    ]
 
     def get_angle(self, landmarks):
         hip = get_xy(landmarks[BodyParts.HIP.left])

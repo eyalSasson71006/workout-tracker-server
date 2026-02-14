@@ -1,3 +1,5 @@
+from app.utils.geometry import get_xy
+from app.utils.geometry import calculate_angle
 from app.utils.enums import BodyParts
 
 def _is_point_visible(point, visibility_threshold):
@@ -91,3 +93,33 @@ def is_body_vertical(landmarks):
     
     # Threshold: 0.1 is roughly 10% of the screen width. If shoulder and hip are within 10% width of each other -> Vertical.
     return diff < 0.13
+
+
+def is_back_straight(landmarks):
+    """
+    Checks if the body forms a roughly straight line (shoulder → hip → knee).
+    Uses the angle at the hip to detect sagging or piking.
+    A straight body ≈ 180°, a sagging/piked body is much less.
+    """
+    # Get Key Points
+    left_shoulder = landmarks[BodyParts.SHOULDER.left]
+    left_hip = landmarks[BodyParts.HIP.left]
+    left_knee = landmarks[BodyParts.KNEE.left]
+    right_shoulder = landmarks[BodyParts.SHOULDER.right]
+    right_hip = landmarks[BodyParts.HIP.right]
+    right_knee = landmarks[BodyParts.KNEE.right]
+
+    # Use the more visible side for each body part
+    shoulder = left_shoulder if left_shoulder.visibility > right_shoulder.visibility else right_shoulder
+    hip = left_hip if left_hip.visibility > right_hip.visibility else right_hip
+    knee = left_knee if left_knee.visibility > right_knee.visibility else right_knee
+
+    # Convert to [x, y] arrays for angle calculation
+    shoulder = get_xy(shoulder)
+    hip = get_xy(hip)
+    knee = get_xy(knee)
+
+    # Calculate the angle at the hip joint (shoulder → hip → knee)
+    # ~180° = perfectly straight, <150° = sagging or piking
+    angle = calculate_angle(shoulder, hip, knee)
+    return angle > 140

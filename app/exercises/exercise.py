@@ -12,8 +12,7 @@ class ExerciseCounter(ABC):
 
     # --- Subclass configuration (override as needed) ---
     required_groups = None          # BodyParts needed in frame (None = default)
-    position_check = None           # Function like is_body_vertical (or None to skip)
-    position_feedback = ""          # Feedback when position check fails
+    position_checks = []            # List of (check_fn, feedback_msg) tuples
 
     def __init__(self):
         self.count = 0
@@ -37,11 +36,12 @@ class ExerciseCounter(ABC):
             cv2.putText(img, self.feedback, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
             return img
 
-        # Check B: Is the user in the correct position? (if a check is defined)
-        if self.position_check and not self.position_check(landmarks):
-            self.feedback = self.position_feedback
-            cv2.putText(img, self.feedback, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,165,255), 2)
-            return img
+        # Check B: Run all position checks (stops on first failure)
+        for check_fn, feedback_msg in self.position_checks:
+            if not check_fn(landmarks):
+                self.feedback = feedback_msg
+                cv2.putText(img, self.feedback, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,165,255), 2)
+                return img
 
         # 1. Get angle from subclass
         angle = self.get_angle(landmarks)
