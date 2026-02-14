@@ -1,4 +1,4 @@
-import mediapipe as mp
+from app.utils.enums import BodyParts
 
 def _is_point_visible(point, visibility_threshold):
     """Returns True if a single landmark is visible and within screen bounds."""
@@ -23,14 +23,13 @@ def is_whole_body_in_frame(landmarks, required_groups=None, visibility_threshold
     if not landmarks:
         return False
         
-    mp_pose = mp.solutions.pose
     # Default: check key points, where left/right pairs need only one side visible
     if required_groups is None:
         required_groups = [
-            mp_pose.PoseLandmark.NOSE.value,
-            (mp_pose.PoseLandmark.LEFT_WRIST.value, mp_pose.PoseLandmark.RIGHT_WRIST.value),
-            (mp_pose.PoseLandmark.LEFT_ANKLE.value, mp_pose.PoseLandmark.RIGHT_ANKLE.value),
-            (mp_pose.PoseLandmark.LEFT_HIP.value, mp_pose.PoseLandmark.RIGHT_HIP.value),    
+            BodyParts.NOSE,
+            BodyParts.WRIST,
+            BodyParts.ANKLE,
+            BodyParts.HIP,
         ]
 
     for group in required_groups:
@@ -50,13 +49,11 @@ def is_body_horizontal(landmarks):
     Checks if the torso is roughly horizontal (Parallel to the ground).
     Compares the Y-coordinate (height) of Shoulders vs Hips.
     """
-    mp_pose = mp.solutions.pose
-    
     # Get Key Points
-    left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-    left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
-    right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-    right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
+    left_shoulder = landmarks[BodyParts.SHOULDER.left]
+    left_hip = landmarks[BodyParts.HIP.left]
+    right_shoulder = landmarks[BodyParts.SHOULDER.right]
+    right_hip = landmarks[BodyParts.HIP.right]
 
     # Use the more visible side for each body part
     shoulder = left_shoulder if left_shoulder.visibility > right_shoulder.visibility else right_shoulder
@@ -77,13 +74,11 @@ def is_body_vertical(landmarks):
     Checks if the torso is roughly vertical (perpendicular to the ground).
     Compares the X-coordinate (horizontal position) of Shoulders vs Hips.
     """
-    mp_pose = mp.solutions.pose
-    
     # Get Key Points
-    left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-    left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
-    right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-    right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
+    left_shoulder = landmarks[BodyParts.SHOULDER.left]
+    left_hip = landmarks[BodyParts.HIP.left]
+    right_shoulder = landmarks[BodyParts.SHOULDER.right]
+    right_hip = landmarks[BodyParts.HIP.right]
 
     # Use the more visible side for each body part
     shoulder = left_shoulder if left_shoulder.visibility > right_shoulder.visibility else right_shoulder
@@ -95,4 +90,4 @@ def is_body_vertical(landmarks):
     diff = abs(shoulder.x - hip.x)
     
     # Threshold: 0.1 is roughly 10% of the screen width. If shoulder and hip are within 10% width of each other -> Vertical.
-    return diff < 0.15
+    return diff < 0.13

@@ -1,5 +1,9 @@
 import numpy as np
 
+def get_xy(landmark):
+    """Extracts [x, y] from a MediaPipe landmark."""
+    return [landmark.x, landmark.y]
+
 def calculate_angle(a, b, c):
     """
     Calculates the angle at point 'b' given three points [x, y].

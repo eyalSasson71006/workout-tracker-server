@@ -9,8 +9,8 @@ def main():
     detector = PoseDetector()
 
     cap = cv2.VideoCapture(settings.CAMERA_INDEX)
-    cap.set(3, settings.FRAME_WIDTH)
-    cap.set(4, settings.FRAME_HEIGHT)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, settings.FRAME_WIDTH)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, settings.FRAME_HEIGHT)
     
     workout_names = [w.value.capitalize() for w in Workout]
     print("Starting Workout Tracker. Press 'q' to exit.")
